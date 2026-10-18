@@ -13,9 +13,7 @@ use Laravel\Socialite\Two\InvalidStateException;
 
 class AuthController extends Controller
 {
-    public function __construct(private UserRepositoryInterface $users)
-    {
-    }
+    public function __construct(private UserRepositoryInterface $users) {}
 
     public function showLoginForm(): View
     {
@@ -27,6 +25,10 @@ class AuthController extends Controller
         $credentials = $request->validated();
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            activity('auth')
+                ->withProperties(['mobile' => $credentials['mobile'], 'ip' => $request->ip()])
+                ->log('Failed login attempt');
+
             return back()
                 ->withInput($request->only('mobile'))
                 ->withErrors(['mobile' => 'These credentials do not match our records.']);
@@ -34,7 +36,12 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        activity('auth')
+            ->causedBy(Auth::user())
+            ->withProperties(['method' => 'mobile', 'ip' => $request->ip()])
+            ->log('User logged in');
+
+        return redirect()->intended(route(Auth::user()->dashboardRouteName()));
     }
 
     public function redirectToGoogle(): RedirectResponse
@@ -61,11 +68,21 @@ class AuthController extends Controller
 
         Auth::login($user, remember: true);
 
-        return redirect()->intended(route('dashboard'));
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties(['method' => 'google', 'ip' => request()->ip()])
+            ->log('User logged in');
+
+        return redirect()->intended(route($user->dashboardRouteName()));
     }
 
     public function logout(): RedirectResponse
     {
+        activity('auth')
+            ->causedBy(Auth::user())
+            ->withProperties(['ip' => request()->ip()])
+            ->log('User logged out');
+
         Auth::logout();
 
         request()->session()->invalidate();

@@ -6,20 +6,39 @@
 
         <title>Dashboard - {{ config('app.name', 'Laravel') }}</title>
 
+        @include('partials.favicon')
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-gray-50 text-gray-900 flex min-h-screen items-center justify-center p-6">
         <div class="w-full max-w-sm text-center">
+            <div class="mb-6 flex justify-center">
+                @include('partials.logo')
+            </div>
+
             <h1 class="mb-2 font-medium">Welcome, {{ auth()->user()->name }}</h1>
             <p class="mb-6 text-sm text-gray-500">{{ auth()->user()->email ?? auth()->user()->mobile }}</p>
+
+            <div class="mb-6 flex justify-center gap-4 text-sm">
+                @if (auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Admin panel</a>
+                @endif
+                @if (auth()->user()->isSuperAdmin())
+                    <a href="{{ route('super-admin.dashboard') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Super admin panel</a>
+                @endif
+                @can('viewLogViewer')
+                    <a href="{{ route('activity-log.index') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Activity log</a>
+                    <a href="{{ url(config('log-viewer.route_path', 'log-viewer')) }}" class="cursor-pointer text-gray-500 hover:text-gray-700">App logs</a>
+                @endcan
+            </div>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button
                     type="submit"
-                    class="rounded-md border border-gray-300 px-5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                    class="cursor-pointer rounded-md border border-gray-300 px-5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
                 >
                     Log out
                 </button>
