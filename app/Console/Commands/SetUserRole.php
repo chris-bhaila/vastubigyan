@@ -18,10 +18,10 @@ class SetUserRole extends Command
     public function handle(): int
     {
         $email = $this->argument('email');
-        $role = Role::tryFrom($this->argument('role'));
+        $role = Role::fromSlug($this->argument('role'));
 
         if (! $role) {
-            $allowed = implode(', ', array_map(fn (Role $case) => $case->value, Role::cases()));
+            $allowed = implode(', ', array_map(fn (Role $case) => $case->slug(), Role::cases()));
             $this->error("Invalid role. Allowed roles: {$allowed}");
 
             return self::FAILURE;
@@ -37,7 +37,7 @@ class SetUserRole extends Command
 
         $user->forceFill(['role' => $role])->save();
 
-        $this->info("{$user->email} is now {$role->value}.");
+        $this->info("{$user->email} is now {$role->slug()}.");
 
         return self::SUCCESS;
     }

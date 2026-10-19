@@ -30,7 +30,7 @@ class User extends Authenticatable
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'role' => 'user',
+        'role' => Role::User->value,
     ];
 
     /**
@@ -60,9 +60,9 @@ class User extends Authenticatable
     public function hasRole(Role|string ...$roles): bool
     {
         foreach ($roles as $role) {
-            $value = $role instanceof Role ? $role->value : $role;
+            $role = $role instanceof Role ? $role : Role::fromSlug($role);
 
-            if ($this->role->value === $value) {
+            if ($role && $this->role === $role) {
                 return true;
             }
         }
