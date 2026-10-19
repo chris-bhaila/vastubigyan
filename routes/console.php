@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('credits:expire')->daily();
+
+Schedule::command('esewa:reconcile')->everyFifteenMinutes()->withoutOverlapping();

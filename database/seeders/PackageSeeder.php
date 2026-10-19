@@ -10,18 +10,19 @@ class PackageSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * Prices are placeholders pending client confirmation.
+     * Matches the paid plans shown on the pricing page (config/pricing.php),
+     * keyed by slug so "Buy now" can look up the right package.
      */
     public function run(): void
     {
         Package::query()->updateOrCreate(
-            ['name' => '1 Analysis'],
-            ['analysis_count' => 1, 'price' => 1000, 'validity_days' => 365, 'is_active' => true],
+            ['slug' => 'premium-app'],
+            ['name' => 'Premium App', 'analysis_count' => 1, 'price' => 1100, 'validity_days' => 365, 'is_active' => true],
         );
 
         Package::query()->updateOrCreate(
-            ['name' => '10 Analyses'],
-            ['analysis_count' => 10, 'price' => 10000, 'validity_days' => 365, 'is_active' => true],
+            ['slug' => 'web-app-premium'],
+            ['name' => 'Web + App Premium', 'analysis_count' => 25, 'price' => 29400, 'validity_days' => 365, 'is_active' => true],
         );
     }
 }

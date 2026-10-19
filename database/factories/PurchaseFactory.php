@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Purchase>
@@ -24,10 +25,12 @@ class PurchaseFactory extends Factory
             'user_id' => User::factory(),
             'package_id' => Package::factory(),
             'amount' => fake()->numberBetween(1000, 10000),
-            'gateway' => null,
+            'gateway' => 'esewa',
             'gateway_ref' => null,
+            'transaction_uuid' => (string) Str::uuid(),
             'status' => PurchaseStatus::Pending,
             'paid_at' => null,
+            'gateway_payload' => null,
         ];
     }
 

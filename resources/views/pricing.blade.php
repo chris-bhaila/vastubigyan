@@ -118,16 +118,27 @@
                             @endforeach
                         </ul>
 
-                        <a
-                            href="{{ $plan['cta_url'] }}"
-                            class="mt-auto flex min-h-12 cursor-pointer items-center justify-center rounded-xl px-5 text-center font-bold transition {{ $plan['featured']
-                                ? 'bg-saffron text-ink hover:opacity-90'
-                                : ($plan['slug'] === 'free'
-                                    ? 'border-2 border-ink text-ink hover:bg-ink hover:text-dark'
-                                    : 'bg-ink text-dark hover:opacity-90') }}"
-                        >
-                            {{ $plan['cta_label'] }}
-                        </a>
+                        @php
+                            $ctaClass = 'mt-auto flex min-h-12 w-full cursor-pointer items-center justify-center rounded-xl px-5 text-center font-bold transition '
+                                . ($plan['featured']
+                                    ? 'bg-saffron text-ink hover:opacity-90'
+                                    : ($plan['slug'] === 'free'
+                                        ? 'border-2 border-ink text-ink hover:bg-ink hover:text-dark'
+                                        : 'bg-ink text-dark hover:opacity-90'));
+                        @endphp
+
+                        @if ($plan['package'])
+                            <form method="POST" action="{{ route('checkout.store', $plan['package']) }}">
+                                @csrf
+                                <button type="submit" class="{{ $ctaClass }}">
+                                    {{ $plan['cta_label'] }}
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ $plan['cta_url'] }}" class="{{ $ctaClass }}">
+                                {{ $plan['cta_label'] }}
+                            </a>
+                        @endif
                     </div>
                 @endforeach
             </div>

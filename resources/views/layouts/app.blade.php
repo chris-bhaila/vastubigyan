@@ -36,7 +36,7 @@
             ></div>
 
             <div class="flex min-h-screen flex-1 flex-col">
-                <header class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 lg:hidden">
+                <header class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 lg:hidden print:hidden">
                     <button
                         type="button"
                         data-sidebar-toggle

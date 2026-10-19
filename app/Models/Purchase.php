@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['user_id', 'package_id', 'amount', 'gateway', 'gateway_ref', 'status', 'paid_at'])]
+#[Fillable(['user_id', 'package_id', 'amount', 'gateway', 'gateway_ref', 'transaction_uuid', 'status', 'paid_at', 'gateway_payload'])]
 class Purchase extends Model
 {
     /** @use HasFactory<PurchaseFactory> */
@@ -27,6 +27,7 @@ class Purchase extends Model
             'amount' => 'integer',
             'status' => PurchaseStatus::class,
             'paid_at' => 'datetime',
+            'gateway_payload' => 'array',
         ];
     }
 
