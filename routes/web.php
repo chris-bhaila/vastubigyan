@@ -3,8 +3,11 @@
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
 
 Route::get('/', function () {
     if (auth()->check()) {

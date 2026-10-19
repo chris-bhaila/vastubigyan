@@ -1,48 +1,27 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Dashboard - {{ config('app.name', 'Laravel') }}</title>
+@section('title', 'Dashboard - ' . config('app.name', 'Laravel'))
 
-        @include('partials.favicon')
+@section('content')
+    <div class="animate-fade-in-up">
+        <h1 class="text-2xl font-semibold tracking-tight">Welcome, {{ auth()->user()->name }}</h1>
+        <p class="mt-1 text-sm text-gray-500">Here's your account at a glance.</p>
+    </div>
 
-        @fonts
-
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="bg-gray-50 text-gray-900 flex min-h-screen items-center justify-center p-6">
-        <div class="w-full max-w-sm text-center">
-            <div class="mb-6 flex justify-center">
-                @include('partials.logo')
+    <div class="animate-fade-in-up animation-delay-75 mt-8 max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+        <div class="flex items-center gap-4">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/10 text-lg font-semibold text-accent">
+                {{ Str::upper(Str::substr(auth()->user()->name, 0, 1)) }}
+            </span>
+            <div class="min-w-0">
+                <p class="truncate font-medium">{{ auth()->user()->name }}</p>
+                <p class="truncate text-sm text-gray-500">{{ auth()->user()->email ?? auth()->user()->mobile }}</p>
             </div>
-
-            <h1 class="mb-2 font-medium">Welcome, {{ auth()->user()->name }}</h1>
-            <p class="mb-6 text-sm text-gray-500">{{ auth()->user()->email ?? auth()->user()->mobile }}</p>
-
-            <div class="mb-6 flex justify-center gap-4 text-sm">
-                @if (auth()->user()->isAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Admin panel</a>
-                @endif
-                @if (auth()->user()->isSuperAdmin())
-                    <a href="{{ route('super-admin.dashboard') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Super admin panel</a>
-                @endif
-                @can('viewLogViewer')
-                    <a href="{{ route('activity-log.index') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Activity log</a>
-                    <a href="{{ url(config('log-viewer.route_path', 'log-viewer')) }}" class="cursor-pointer text-gray-500 hover:text-gray-700">App logs</a>
-                @endcan
-            </div>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button
-                    type="submit"
-                    class="cursor-pointer rounded-md border border-gray-300 px-5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                    Log out
-                </button>
-            </form>
         </div>
-    </body>
-</html>
+
+        <div class="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
+            <span class="text-gray-500">Role</span>
+            <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">{{ auth()->user()->role->label() }}</span>
+        </div>
+    </div>
+@endsection

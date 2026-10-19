@@ -1,47 +1,27 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Admin - {{ config('app.name', 'Laravel') }}</title>
+@section('title', 'Admin - ' . config('app.name', 'Laravel'))
 
-        @include('partials.favicon')
+@section('content')
+    <div class="animate-fade-in-up">
+        <h1 class="text-2xl font-semibold tracking-tight">Admin dashboard</h1>
+        <p class="mt-1 text-sm text-gray-500">
+            Signed in as {{ auth()->user()->name }}
+            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ auth()->user()->role->label() }}</span>
+        </p>
+    </div>
 
-        @fonts
-
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="bg-gray-50 text-gray-900 flex min-h-screen items-center justify-center p-6">
-        <div class="w-full max-w-sm text-center">
-            <div class="mb-6 flex justify-center">
-                @include('partials.logo')
-            </div>
-
-            <h1 class="mb-2 font-medium">Admin dashboard</h1>
-            <p class="mb-6 text-sm text-gray-500">Signed in as {{ auth()->user()->name }} ({{ auth()->user()->role->label() }})</p>
-
-            <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4">
-                <p class="text-2xl font-semibold">{{ $userCount }}</p>
+    <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="animate-fade-in-up animation-delay-75 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+            <div class="flex items-center justify-between">
                 <p class="text-sm text-gray-500">Registered users</p>
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 100-8 4 4 0 000 8zm6 3a4 4 0 00-8 0" />
+                    </svg>
+                </span>
             </div>
-
-            @can('viewLogViewer')
-                <div class="mb-6 flex items-center justify-center gap-4 text-sm">
-                    <a href="{{ route('activity-log.index') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Activity log</a>
-                    <a href="{{ url(config('log-viewer.route_path', 'log-viewer')) }}" class="cursor-pointer text-gray-500 hover:text-gray-700">App logs</a>
-                </div>
-            @endcan
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button
-                    type="submit"
-                    class="cursor-pointer rounded-md border border-gray-300 px-5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                    Log out
-                </button>
-            </form>
+            <p class="mt-4 text-3xl font-semibold tracking-tight">{{ $userCount }}</p>
         </div>
-    </body>
-</html>
+    </div>
+@endsection

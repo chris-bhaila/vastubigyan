@@ -7,4 +7,31 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --color-accent: #fd9100;
+    --animate-fade-in-up: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(0.75rem);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+@layer utilities {
+    .animation-delay-75 {
+        animation-delay: 75ms;
+    }
+    .animation-delay-150 {
+        animation-delay: 150ms;
+    }
+    .animation-delay-225 {
+        animation-delay: 225ms;
+    }
+    .animation-delay-300 {
+        animation-delay: 300ms;
+    }
 }

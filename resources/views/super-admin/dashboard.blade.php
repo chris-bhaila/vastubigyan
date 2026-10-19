@@ -1,57 +1,53 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Super Admin - {{ config('app.name', 'Laravel') }}</title>
+@section('title', 'Super Admin - ' . config('app.name', 'Laravel'))
 
-        @include('partials.favicon')
+@php
+    $roleIcons = [
+        'Super Admin' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.951.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />',
+        'Admin' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />',
+        'User' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />',
+    ];
 
-        @fonts
+    $delays = ['animation-delay-150', 'animation-delay-225', 'animation-delay-300'];
+@endphp
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="bg-gray-50 text-gray-900 flex min-h-screen items-center justify-center p-6">
-        <div class="w-full max-w-sm text-center">
-            <div class="mb-6 flex justify-center">
-                @include('partials.logo')
-            </div>
+@section('content')
+    <div class="animate-fade-in-up">
+        <h1 class="text-2xl font-semibold tracking-tight">Super admin dashboard</h1>
+        <p class="mt-1 text-sm text-gray-500">
+            Signed in as {{ auth()->user()->name }}
+            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ auth()->user()->role->label() }}</span>
+        </p>
+    </div>
 
-            <h1 class="mb-2 font-medium">Super admin dashboard</h1>
-            <p class="mb-6 text-sm text-gray-500">Signed in as {{ auth()->user()->name }} ({{ auth()->user()->role->label() }})</p>
-
-            <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4">
-                <p class="mb-3 text-2xl font-semibold">{{ $userCount }}</p>
-                <p class="mb-4 text-sm text-gray-500">Registered users</p>
-
-                <dl class="space-y-1 text-left text-sm">
-                    @foreach ($roleCounts as $label => $count)
-                        <div class="flex justify-between border-t border-gray-100 pt-1 first:border-0 first:pt-0">
-                            <dt class="text-gray-500">{{ $label }}</dt>
-                            <dd class="font-medium">{{ $count }}</dd>
-                        </div>
-                    @endforeach
-                </dl>
-            </div>
-
-            <div class="mb-6 flex items-center justify-center gap-4 text-sm">
-                <a href="{{ route('admin.dashboard') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Admin panel</a>
-                @can('viewLogViewer')
-                    <a href="{{ route('activity-log.index') }}" class="cursor-pointer text-gray-500 hover:text-gray-700">Activity log</a>
-                    <a href="{{ url(config('log-viewer.route_path', 'log-viewer')) }}" class="cursor-pointer text-gray-500 hover:text-gray-700">App logs</a>
-                @endcan
-            </div>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button
-                    type="submit"
-                    class="cursor-pointer rounded-md border border-gray-300 px-5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                    Log out
-                </button>
-            </form>
+    <div class="animate-fade-in-up animation-delay-75 mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">Registered users</p>
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 100-8 4 4 0 000 8zm6 3a4 4 0 00-8 0" />
+                </svg>
+            </span>
         </div>
-    </body>
-</html>
+        <p class="mt-4 text-3xl font-semibold tracking-tight">{{ $userCount }}</p>
+    </div>
+
+    <h2 class="animate-fade-in-up animation-delay-150 mt-8 text-sm font-medium text-gray-500">By role</h2>
+
+    <div class="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-3">
+        @foreach ($roleCounts as $label => $count)
+            <div class="animate-fade-in-up {{ $delays[$loop->index] ?? '' }} rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-gray-500">{{ $label }}</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            {!! $roleIcons[$label] ?? $roleIcons['User'] !!}
+                        </svg>
+                    </span>
+                </div>
+                <p class="mt-4 text-3xl font-semibold tracking-tight">{{ $count }}</p>
+            </div>
+        @endforeach
+    </div>
+@endsection
