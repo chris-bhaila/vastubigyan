@@ -1,13 +1,12 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EsewaPaymentController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
@@ -28,9 +27,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -55,11 +52,3 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/payment/esewa/success', [EsewaPaymentController::class, 'success'])->name('payment.esewa.success');
 Route::get('/payment/esewa/failure/{purchase}', [EsewaPaymentController::class, 'failure'])->name('payment.esewa.failure');
-
-Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-});
-
-Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
-    Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
-});

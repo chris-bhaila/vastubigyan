@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Mail\WelcomeMail;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
@@ -65,6 +67,10 @@ class AuthController extends Controller
             'google_id' => $googleUser->getId(),
             'avatar' => $googleUser->getAvatar(),
         ]);
+
+        if ($user->wasRecentlyCreated) {
+            Mail::to($user)->send(new WelcomeMail($user));
+        }
 
         Auth::login($user, remember: true);
 

@@ -21,6 +21,11 @@
     }
 }
 
+body {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
 @layer utilities {
     .animation-delay-75 {
         animation-delay: 75ms;

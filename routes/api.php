@@ -8,4 +8,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('users', UserController::class);
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('users', UserController::class)->except('store');
+});

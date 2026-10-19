@@ -11,75 +11,23 @@ class RoleAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_is_redirected_from_admin_panel(): void
-    {
-        $response = $this->get('/admin');
-
-        $response->assertRedirect(route('login'));
-    }
-
-    public function test_guest_is_redirected_from_super_admin_panel(): void
-    {
-        $response = $this->get('/super-admin');
-
-        $response->assertRedirect(route('login'));
-    }
-
-    public function test_user_gets_forbidden_on_admin_panel(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/admin');
-
-        $response->assertForbidden();
-    }
-
-    public function test_user_gets_forbidden_on_super_admin_panel(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/super-admin');
-
-        $response->assertForbidden();
-    }
-
-    public function test_admin_can_access_admin_panel(): void
+    public function test_the_admin_panel_route_no_longer_exists(): void
     {
         $admin = User::factory()->create();
         $admin->forceFill(['role' => Role::Admin])->save();
 
         $response = $this->actingAs($admin)->get('/admin');
 
-        $response->assertOk();
+        $response->assertNotFound();
     }
 
-    public function test_admin_gets_forbidden_on_super_admin_panel(): void
-    {
-        $admin = User::factory()->create();
-        $admin->forceFill(['role' => Role::Admin])->save();
-
-        $response = $this->actingAs($admin)->get('/super-admin');
-
-        $response->assertForbidden();
-    }
-
-    public function test_super_admin_can_access_admin_panel(): void
-    {
-        $superAdmin = User::factory()->create();
-        $superAdmin->forceFill(['role' => Role::SuperAdmin])->save();
-
-        $response = $this->actingAs($superAdmin)->get('/admin');
-
-        $response->assertOk();
-    }
-
-    public function test_super_admin_can_access_super_admin_panel(): void
+    public function test_the_super_admin_panel_route_no_longer_exists(): void
     {
         $superAdmin = User::factory()->create();
         $superAdmin->forceFill(['role' => Role::SuperAdmin])->save();
 
         $response = $this->actingAs($superAdmin)->get('/super-admin');
 
-        $response->assertOk();
+        $response->assertNotFound();
     }
 }

@@ -72,11 +72,7 @@ class User extends Authenticatable
 
     public function dashboardRouteName(): string
     {
-        return match ($this->role) {
-            Role::SuperAdmin => 'super-admin.dashboard',
-            Role::Admin => 'admin.dashboard',
-            Role::User => 'dashboard',
-        };
+        return 'dashboard';
     }
 
     public function creditBatches(): HasMany

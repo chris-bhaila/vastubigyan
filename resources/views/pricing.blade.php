@@ -1,9 +1,17 @@
-@extends('layouts.marketing')
+@extends('layouts.app')
 
 @section('title', 'Pricing - ' . config('app.name', 'Laravel'))
 
+@push('head')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Manrope:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+
+    @vite(['resources/css/pricing.css'])
+@endpush
+
 @section('content')
-    <div class="mx-auto max-w-[1120px] px-6 py-16 sm:py-24">
+    <div class="mx-auto max-w-[1120px] py-10 sm:py-16">
         {{-- Hero --}}
         <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
             <div>
@@ -128,7 +136,7 @@
                         @endphp
 
                         @if ($plan['package'])
-                            <form method="POST" action="{{ route('checkout.store', $plan['package']) }}">
+                            <form method="POST" action="{{ route('checkout.store', $plan['package']) }}" class="mt-auto">
                                 @csrf
                                 <button type="submit" class="{{ $ctaClass }}">
                                     {{ $plan['cta_label'] }}

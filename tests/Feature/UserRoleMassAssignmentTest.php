@@ -31,7 +31,7 @@ class UserRoleMassAssignmentTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->putJson("/api/users/{$user->id}", [
+        $response = $this->actingAs($user)->putJson("/api/users/{$user->id}", [
             'name' => 'Updated Name',
             'role' => Role::SuperAdmin->value,
         ]);
