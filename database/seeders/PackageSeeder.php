@@ -17,12 +17,12 @@ class PackageSeeder extends Seeder
     {
         Package::query()->updateOrCreate(
             ['slug' => 'premium-app'],
-            ['name' => 'Premium App', 'analysis_count' => 1, 'price' => 1100, 'validity_days' => 365, 'is_active' => true],
+            ['name' => '1 Analysis', 'analysis_count' => 1, 'price' => 1000, 'validity_days' => 365, 'is_active' => true],
         );
 
         Package::query()->updateOrCreate(
             ['slug' => 'web-app-premium'],
-            ['name' => 'Web + App Premium', 'analysis_count' => 25, 'price' => 29400, 'validity_days' => 365, 'is_active' => true],
+            ['name' => '10 Analysis', 'analysis_count' => 10, 'price' => 9000, 'validity_days' => 365, 'is_active' => true],
         );
     }
 }

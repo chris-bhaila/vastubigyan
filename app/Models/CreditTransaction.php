@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LogicException;
 
-#[Fillable(['user_id', 'credit_batch_id', 'amount', 'type', 'analysis_id', 'note'])]
+#[Fillable(['user_id', 'actor_id', 'credit_batch_id', 'amount', 'type', 'analysis_id', 'note'])]
 class CreditTransaction extends Model
 {
     /**
@@ -32,6 +32,11 @@ class CreditTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function actor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actor_id');
     }
 
     public function creditBatch(): BelongsTo

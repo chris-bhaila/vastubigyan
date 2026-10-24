@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Package;
 use App\Models\User;
+use Database\Seeders\PackageSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,5 +45,22 @@ class PricingPageTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-sidebar', escape: false);
         $response->assertSee(route('dashboard'), escape: false);
+    }
+
+    public function test_the_page_shows_the_packages_tables_price_not_configs(): void
+    {
+        $this->seed(PackageSeeder::class);
+
+        $package = Package::where('slug', 'premium-app')->firstOrFail();
+        $package->update(['price' => 1234]);
+
+        $response = $this->get(route('pricing'));
+
+        $response->assertOk();
+
+        $visibleText = preg_replace('/\s+/', ' ', strip_tags($response->getContent()));
+
+        $this->assertStringContainsString('Nrs. 1,234', $visibleText);
+        $this->assertStringNotContainsString('Nrs. '.number_format(config('pricing.plans')[1]['price']), $visibleText);
     }
 }

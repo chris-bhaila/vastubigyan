@@ -13,7 +13,15 @@ class PricingController extends Controller
         $packagesBySlug = Package::active()->get()->keyBy('slug');
 
         $plans = Collection::make(config('pricing.plans'))->map(function (array $plan) use ($packagesBySlug) {
-            $plan['package'] = $packagesBySlug->get($plan['slug']);
+            $package = $packagesBySlug->get($plan['slug']);
+            $plan['package'] = $package;
+
+            // The packages table is the single source of truth for price;
+            // everything else (features, badge, copy) stays in config since
+            // the table has no columns for it.
+            if ($package) {
+                $plan['price'] = $package->price;
+            }
 
             return $plan;
         });

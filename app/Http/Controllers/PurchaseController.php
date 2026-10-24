@@ -9,22 +9,19 @@ use Illuminate\View\View;
 class PurchaseController extends Controller
 {
     /**
-     * Purchase history, newest first. Admins and super admins see every
-     * user's purchases; everyone else sees only their own.
+     * The logged-in user's own purchase history, newest first. Admins have
+     * their own view of every purchase at /admin/purchases instead.
      */
     public function index(): View
     {
-        $isAdmin = auth()->user()->isAdmin();
-
         $purchases = Purchase::query()
-            ->when(! $isAdmin, fn ($query) => $query->where('user_id', auth()->id()))
-            ->with(['package', 'user'])
+            ->where('user_id', auth()->id())
+            ->with('package')
             ->latest()
             ->paginate(15);
 
         return view('purchases.index', [
             'purchases' => $purchases,
-            'showBuyer' => $isAdmin,
         ]);
     }
 

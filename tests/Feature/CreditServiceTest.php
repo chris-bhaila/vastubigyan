@@ -6,6 +6,7 @@ use App\Enums\CreditTransactionType;
 use App\Enums\PurchaseStatus;
 use App\Enums\Tier;
 use App\Exceptions\InsufficientCreditsException;
+use App\Models\Analysis;
 use App\Models\CreditBatch;
 use App\Models\CreditTransaction;
 use App\Models\Package;
@@ -196,5 +197,92 @@ class CreditServiceTest extends TestCase
             'type' => CreditTransactionType::Refund->value,
             'amount' => -9,
         ]);
+    }
+
+    public function test_restoring_an_analysis_gives_back_one_credit_to_its_original_unexpired_batch(): void
+    {
+        $user = User::factory()->create();
+        $batch = CreditBatch::factory()->for($user)->create(['total' => 5, 'remaining' => 5]);
+
+        $transaction = $this->credits->consume($user);
+        $analysis = Analysis::factory()->for($user)->create(['credit_transaction_id' => $transaction->id]);
+
+        $this->assertSame(4, $batch->fresh()->remaining);
+
+        $this->credits->restoreForAnalysis($analysis);
+
+        $this->assertSame(5, $batch->fresh()->remaining);
+        $this->assertDatabaseHas('credit_transactions', [
+            'analysis_id' => $analysis->id,
+            'type' => CreditTransactionType::Refund->value,
+            'amount' => 1,
+            'credit_batch_id' => $batch->id,
+        ]);
+    }
+
+    public function test_restoring_an_analysis_is_idempotent(): void
+    {
+        $user = User::factory()->create();
+        $batch = CreditBatch::factory()->for($user)->create(['total' => 5, 'remaining' => 5]);
+
+        $transaction = $this->credits->consume($user);
+        $analysis = Analysis::factory()->for($user)->create(['credit_transaction_id' => $transaction->id]);
+
+        $this->credits->restoreForAnalysis($analysis);
+        $this->credits->restoreForAnalysis($analysis);
+
+        $this->assertSame(5, $batch->fresh()->remaining);
+        $this->assertSame(1, CreditTransaction::where('analysis_id', $analysis->id)
+            ->where('type', CreditTransactionType::Refund)
+            ->count());
+    }
+
+    public function test_restoring_an_analysis_whose_original_batch_expired_grants_a_replacement_batch(): void
+    {
+        $user = User::factory()->create();
+        $batch = CreditBatch::factory()->for($user)->create([
+            'total' => 5,
+            'remaining' => 5,
+            'expires_at' => now()->addMinute(),
+        ]);
+
+        $transaction = $this->credits->consume($user);
+        $analysis = Analysis::factory()->for($user)->create(['credit_transaction_id' => $transaction->id]);
+
+        $this->travel(2)->minutes();
+
+        $this->credits->restoreForAnalysis($analysis);
+
+        $this->assertSame(4, $batch->fresh()->remaining);
+
+        $replacement = CreditBatch::where('user_id', $user->id)->where('id', '!=', $batch->id)->first();
+
+        $this->assertNotNull($replacement);
+        $this->assertSame(1, $replacement->remaining);
+        $this->assertSame(1, $replacement->total);
+        $this->assertTrue($replacement->expires_at->isSameDay(now()->addDays(config('credits.restore_days', 30))));
+
+        $this->assertDatabaseHas('credit_transactions', [
+            'analysis_id' => $analysis->id,
+            'type' => CreditTransactionType::Refund->value,
+            'amount' => 1,
+            'credit_batch_id' => $replacement->id,
+        ]);
+    }
+
+    public function test_restoring_a_completed_analysis_does_nothing(): void
+    {
+        $user = User::factory()->create();
+        $batch = CreditBatch::factory()->for($user)->create(['total' => 5, 'remaining' => 5]);
+
+        $transaction = $this->credits->consume($user);
+        $analysis = Analysis::factory()->for($user)->completed()->create(['credit_transaction_id' => $transaction->id]);
+
+        $this->credits->restoreForAnalysis($analysis);
+
+        $this->assertSame(4, $batch->fresh()->remaining);
+        $this->assertSame(0, CreditTransaction::where('analysis_id', $analysis->id)
+            ->where('type', CreditTransactionType::Refund)
+            ->count());
     }
 }

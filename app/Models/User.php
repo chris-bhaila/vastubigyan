@@ -80,9 +80,19 @@ class User extends Authenticatable
         return $this->hasMany(CreditBatch::class);
     }
 
+    public function creditTransactions(): HasMany
+    {
+        return $this->hasMany(CreditTransaction::class);
+    }
+
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class);
+    }
+
+    public function analyses(): HasMany
+    {
+        return $this->hasMany(Analysis::class);
     }
 
     /**

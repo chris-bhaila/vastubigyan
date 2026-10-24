@@ -12,6 +12,12 @@
 
 @section('content')
     <div class="mx-auto max-w-[1120px] py-10 sm:py-16">
+        @if (session('status'))
+            <div class="mb-8 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {{ session('status') }}
+            </div>
+        @endif
+
         {{-- Hero --}}
         <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
             <div>

@@ -15,11 +15,7 @@
     <div class="animate-fade-in-up">
         <h1 class="text-2xl font-semibold tracking-tight">Purchase history</h1>
         <p class="mt-1 text-sm text-gray-500">
-            @if ($showBuyer)
-                Every credit package bought, across all users.
-            @else
-                Every credit package you've bought, and its invoice once paid.
-            @endif
+            Every credit package you've bought, and its invoice once paid.
         </p>
     </div>
 
@@ -29,9 +25,6 @@
                 <div class="min-w-0">
                     <p class="truncate font-medium">{{ $purchase->package->name }}</p>
                     <p class="text-sm text-gray-500">
-                        @if ($showBuyer)
-                            {{ $purchase->user->name }} ({{ $purchase->user->email ?? $purchase->user->mobile }}) ·
-                        @endif
                         {{ $purchase->created_at->format('M j, Y') }} · Nrs. {{ number_format($purchase->amount) }}
                     </p>
                 </div>
@@ -54,7 +47,7 @@
             </div>
         @empty
             <p class="px-6 py-10 text-center text-sm text-gray-400">
-                {{ $showBuyer ? 'No purchases yet.' : "You haven't bought any credits yet." }}
+                {{ "You haven't bought any credits yet." }}
             </p>
         @endforelse
     </div>

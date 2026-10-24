@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasCredits;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
+            'credits.required' => EnsureUserHasCredits::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

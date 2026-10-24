@@ -32,7 +32,7 @@ class PricingBuyNowTest extends TestCase
         $this->seed(PackageSeeder::class);
 
         $package = Package::where('slug', 'premium-app')->firstOrFail();
-        $this->assertSame(1100, $package->price);
+        $this->assertSame(1000, $package->price);
         $this->assertSame(1, $package->analysis_count);
 
         $user = User::factory()->create();
@@ -45,7 +45,7 @@ class PricingBuyNowTest extends TestCase
         $this->assertDatabaseHas('purchases', [
             'user_id' => $user->id,
             'package_id' => $package->id,
-            'amount' => 1100,
+            'amount' => 1000,
             'gateway' => 'esewa',
             'status' => PurchaseStatus::Pending->value,
         ]);

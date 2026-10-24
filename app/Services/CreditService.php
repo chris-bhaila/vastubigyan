@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\AnalysisStatus;
 use App\Enums\CreditSource;
 use App\Enums\CreditTransactionType;
 use App\Enums\PurchaseStatus;
 use App\Exceptions\InsufficientCreditsException;
+use App\Models\Analysis;
 use App\Models\CreditBatch;
 use App\Models\CreditTransaction;
 use App\Models\Purchase;
@@ -64,10 +66,11 @@ class CreditService
 
     /**
      * Grant a batch of credits outside of a purchase, e.g. a goodwill gesture.
+     * The acting admin, if any, is recorded on the ledger row for audit.
      */
-    public function grantManual(User $user, int $count, ?Carbon $expiresAt = null, ?string $note = null): CreditBatch
+    public function grantManual(User $user, int $count, ?Carbon $expiresAt = null, ?string $note = null, ?User $actor = null): CreditBatch
     {
-        return DB::transaction(function () use ($user, $count, $expiresAt, $note) {
+        return DB::transaction(function () use ($user, $count, $expiresAt, $note, $actor) {
             $batch = CreditBatch::create([
                 'user_id' => $user->id,
                 'purchase_id' => null,
@@ -82,6 +85,7 @@ class CreditService
                 'credit_batch_id' => $batch->id,
                 'amount' => $count,
                 'type' => CreditTransactionType::AdminGrant,
+                'actor_id' => $actor?->id,
                 'note' => $note,
             ]);
 
@@ -122,12 +126,72 @@ class CreditService
     }
 
     /**
-     * Mark a purchase refunded and zero out its batch's remaining credits.
-     * Credits already used are not clawed back.
+     * Give back the credit spent on a failed analysis. Idempotent: calling
+     * this more than once for the same analysis restores only one credit.
+     * Restores into the original batch if it hasn't expired yet; otherwise
+     * grants a fresh replacement batch of 1 credit. Never restores for a
+     * completed analysis.
      */
-    public function refund(Purchase $purchase): void
+    public function restoreForAnalysis(Analysis $analysis): void
     {
-        DB::transaction(function () use ($purchase) {
+        DB::transaction(function () use ($analysis) {
+            $analysis = Analysis::query()->where('id', $analysis->id)->lockForUpdate()->first();
+
+            if (! $analysis || $analysis->status === AnalysisStatus::Completed) {
+                return;
+            }
+
+            $alreadyRestored = CreditTransaction::query()
+                ->where('analysis_id', $analysis->id)
+                ->where('type', CreditTransactionType::Refund)
+                ->exists();
+
+            if ($alreadyRestored) {
+                return;
+            }
+
+            $usage = $analysis->credit_transaction_id
+                ? CreditTransaction::query()->find($analysis->credit_transaction_id)
+                : null;
+
+            $originalBatch = $usage
+                ? CreditBatch::query()->where('id', $usage->credit_batch_id)->lockForUpdate()->first()
+                : null;
+
+            if ($originalBatch && $originalBatch->expires_at->isFuture()) {
+                $originalBatch->increment('remaining');
+                $batch = $originalBatch;
+            } else {
+                $batch = CreditBatch::create([
+                    'user_id' => $analysis->user_id,
+                    'purchase_id' => null,
+                    'source' => CreditSource::AdminGrant,
+                    'total' => 1,
+                    'remaining' => 1,
+                    'expires_at' => now()->addDays(config('credits.restore_days', 30)),
+                ]);
+            }
+
+            CreditTransaction::create([
+                'user_id' => $analysis->user_id,
+                'credit_batch_id' => $batch->id,
+                'amount' => 1,
+                'type' => CreditTransactionType::Refund,
+                'analysis_id' => $analysis->id,
+                'note' => "Refund for analysis #{$analysis->id}",
+            ]);
+        });
+    }
+
+    /**
+     * Mark a purchase refunded and zero out its batch's remaining credits.
+     * Credits already used are not clawed back. The acting admin, if any,
+     * is recorded on the ledger row for audit. Idempotent: a purchase whose
+     * batch is already at 0 (already refunded) writes no further row.
+     */
+    public function refund(Purchase $purchase, ?User $actor = null, ?string $note = null): void
+    {
+        DB::transaction(function () use ($purchase, $actor, $note) {
             $purchase->update(['status' => PurchaseStatus::Refunded]);
 
             $batch = CreditBatch::query()
@@ -147,7 +211,8 @@ class CreditService
                 'credit_batch_id' => $batch->id,
                 'amount' => -$removed,
                 'type' => CreditTransactionType::Refund,
-                'note' => "Refund for purchase #{$purchase->id}",
+                'actor_id' => $actor?->id,
+                'note' => $note ?? "Refund for purchase #{$purchase->id}",
             ]);
         });
     }
